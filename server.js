@@ -14,6 +14,8 @@
  // var  bubble = fs.readFileSync('image/bubble.jpg'); // loads file into memory
  // var  ace = fs.readFileSync('image/ace.jpg'); // loads file into memory
  // var  mobile = fs.readFileSync('image/mobile.jpg'); // loads file into memory
+var stylesheet = fs.readFileSync('gallery.css');
+var imageNames = ['ace.jpg', 'bubble.jpg', 'chess.jpg', 'fern.jpg', 'mobile.jpg'];
 
 function serveImage(filename, req, res) {
     fs.readFile('images/' + filename, function(err, body){ // file path relative to our location. Body now contains the binary data that is this pic.
@@ -34,16 +36,23 @@ function serveImage(filename, req, res) {
     switch(req.url) {
             case "/gallery":
             case "/Gallery":
+            var gHtml = imageNames.map( function(filename){
+                return '<img src="' + filename +'" alt="a fishing ace at work">';
+            }).join('');
             var html = '<!doctype html>';
-                html += '<head><title>Dynamic Page</title></head>';
+                html += '<head>'
+                html +=   '<title>Gallery</title>';
+                html +=   '<link href="gallery.css" rel="stylesheet" type="text/css"></link>';
+                html += '</head>';
                 html += '<body>';
                 html += '   <h1>Gallery</h1>';
-                html += '   <image src="/ace.jpg" alt="a fishing ace at work">';
+                html += gHtml;
+                html += '   <img src="/ace.jpg" alt="a fishing ace at work">';
                 html += '   <h1>Hello.</h1> Time is ' + Date.now();
                 html += '</body>';
-                res.setHeader('Content-Type', 'text/html');
-                res.end(html);
-                break;
+            res.setHeader('Content-Type', 'text/html');
+            res.end(html);
+            break;
             case "/chess":
             case "/chess/":
             case "/chess.jpeg":
@@ -78,6 +87,11 @@ function serveImage(filename, req, res) {
             case "/mobile.jpg":
                 // res.end(mobile); if we wanted to use the files loaded in memory.
                 serveImage('mobile.jpg', req, res);
+                break;
+            case "/gallery.css":
+            case "/gallery.css/":
+                res.setHeader('Content-Type', 'text/css');
+                res.end(stylesheet);
                 break;
             default: 
                 res.statusCode = 404;
