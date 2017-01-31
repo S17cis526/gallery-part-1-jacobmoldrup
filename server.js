@@ -32,6 +32,18 @@ function serveImage(filename, req, res) {
  var server  = http.createServer(function(req, res) {
     
     switch(req.url) {
+            case "/gallery":
+            case "/Gallery":
+            var html = '<!doctype html>';
+                html += '<head><title>Dynamic Page</title></head>';
+                html += '<body>';
+                html += '   <h1>Gallery</h1>';
+                html += '   <image src="/ace.jpg" alt="a fishing ace at work">';
+                html += '   <h1>Hello.</h1> Time is ' + Date.now();
+                html += '</body>';
+                res.setHeader('Content-Type', 'text/html');
+                res.end(html);
+                break;
             case "/chess":
             case "/chess/":
             case "/chess.jpeg":
@@ -69,8 +81,8 @@ function serveImage(filename, req, res) {
                 break;
             default: 
                 res.statusCode = 404;
-                re.statusMessage = "Not Found";
-                re.end();
+                res.statusMessage = "Not Found";
+                res.end();
     }
  }); // this creates a server to listen and respond to http request. The one arg is a function we want it to call to handle requests. here we used a lambda.
 
