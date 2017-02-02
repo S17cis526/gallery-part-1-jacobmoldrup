@@ -17,12 +17,30 @@
 var stylesheet = fs.readFileSync('gallery.css');
 var imageNames = ['ace.jpg', 'bubble.jpg', 'chess.jpg', 'fern.jpg', 'mobile.jpg'];
 
+// dynamically gets all the file names in images folders.
+function getImageNames(callback) {
+    fs.readdir('images/', function(err, fileNames) {
+        if(err){ callback(err, undefined); }
+        else{ callback(false, fileNames)};
+        
+    });
+}
+
+// mapes file names to img tags.
+function imageNamesToTags(fileNames) {
+    return fileNames.map(function (fileName){
+        return `<img src="${fileName}" alt="${fileName}">`;
+    });
+
+}
+
+
 function serveImage(filename, req, res) {
     fs.readFile('images/' + filename, function(err, body){ // file path relative to our location. Body now contains the binary data that is this pic.
         if(err) {
             console.error(err);
-            res.statusCode = 500;
-            res.statusMessage = "Server Error";
+            res.statusCode = 404;
+            res.statusMessage = "Resource not found";
             res.end("Silly me");
             return;
         }
@@ -31,72 +49,52 @@ function serveImage(filename, req, res) {
     });
 }
 
+function serveGallery(req, res){
+    getImageNames(function(err, imageNames){
+        if(err){ 
+            console.error(err);
+            res.statusCode = 500;
+            res.statusMessage = "Server Error";
+            res.end("Whoops");
+            return;
+        }
+        res.setHeader('Content-Type', 'text/html');
+        res.end(buildGallery(imageNames));
+    });
+}
+
+function buildGallery(imageTags)
+{
+    var html = '<!doctype html>';
+        html += '<head>'
+        html +=   '<title>Gallery</title>';
+        html +=   '<link href="gallery.css" rel="stylesheet" type="text/css"></link>';
+        html += '</head>';
+        html += '<body>';
+        html += '   <h1>Gallery</h1>';
+        html += imageNamesToTags(imageTags).join('');
+        html += '   <img src="/ace.jpg" alt="a fishing ace at work">';
+        html += '   <h1>Hello.</h1> Time is ' + Date.now();
+        html += '</body>';
+    return html
+
+}
+
  var server  = http.createServer(function(req, res) {
     
     switch(req.url) {
-            case "/gallery":
-            case "/Gallery":
-            var gHtml = imageNames.map( function(filename){
-                return '<img src="' + filename +'" alt="a fishing ace at work">';
-            }).join('');
-            var html = '<!doctype html>';
-                html += '<head>'
-                html +=   '<title>Gallery</title>';
-                html +=   '<link href="gallery.css" rel="stylesheet" type="text/css"></link>';
-                html += '</head>';
-                html += '<body>';
-                html += '   <h1>Gallery</h1>';
-                html += gHtml;
-                html += '   <img src="/ace.jpg" alt="a fishing ace at work">';
-                html += '   <h1>Hello.</h1> Time is ' + Date.now();
-                html += '</body>';
-            res.setHeader('Content-Type', 'text/html');
-            res.end(html);
+        case '/':
+        case "/gallery":
+        case "/Gallery":
+            serveGallery(req, res);
+        break;
+        case "/gallery.css":
+        case "/gallery.css/":
+            res.setHeader('Content-Type', 'text/css');
+            res.end(stylesheet);
             break;
-            case "/chess":
-            case "/chess/":
-            case "/chess.jpeg":
-            case "/chess.jpg":
-                // res.end(chess); if we wanted to use the files loaded in memory.
-                serveImage('chess.jpg', req, res);
-                break;
-            case "/fern":
-            case "/fern/":
-            case "/fern.jpeg":
-            case "/fern.jpg":
-                // res.end(fern); if we wanted to use the files loaded in memory.
-                serveImage('fern.jpg', req, res);
-                break;
-            case "/ace":
-            case "/ace/":
-            case "/ace.jpeg":
-            case "/ace.jpg":
-                // res.end(ace); if we wanted to use the files loaded in memory.
-                serveImage('ace.jpg', req, res);
-                break;
-            case "/bubble":
-            case "/bubble/":
-            case "/bubble.jpeg":
-            case "/bubble.jpg":
-                // res.end(bubble); if we wanted to use the files loaded in memory.
-                serveImage('bubble.jpg', req, res);
-                break;
-            case "/mobile":
-            case "/mobile/":
-            case "/mobile.jpeg":
-            case "/mobile.jpg":
-                // res.end(mobile); if we wanted to use the files loaded in memory.
-                serveImage('mobile.jpg', req, res);
-                break;
-            case "/gallery.css":
-            case "/gallery.css/":
-                res.setHeader('Content-Type', 'text/css');
-                res.end(stylesheet);
-                break;
-            default: 
-                res.statusCode = 404;
-                res.statusMessage = "Not Found";
-                res.end();
+        default: 
+            serveImage(req.url, req, res);
     }
  }); // this creates a server to listen and respond to http request. The one arg is a function we want it to call to handle requests. here we used a lambda.
 
