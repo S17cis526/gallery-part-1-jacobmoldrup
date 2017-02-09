@@ -109,7 +109,6 @@ function buildGallery(imageTags)
         html += '    <input type="file" name="image">';
         html += '    <input type="submit" value="Upload Image">';
         html += '</form>';
-        html += '   <img src="/ace.jpg" alt="a fishing ace at work">';
         html += '   <h1>Hello.</h1> Time is ' + Date.now();
         html += '</body>';
     return html
