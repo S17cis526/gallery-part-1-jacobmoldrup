@@ -10,7 +10,7 @@ var multipart = require('./multipart');
 var http = require('http');
 var url = require('url');
 var fs = require('fs');
-var port = 3000;
+var port = 9595;
 
 /* load cached files */
 var config = JSON.parse(fs.readFileSync('config.json'));
@@ -120,7 +120,7 @@ function serveImage(fileName, req, res) {
 function uploadImage(req, res) {
   multipart(req, res, function(req, res) {
     // make sure an image was uploaded
-    console.log('filename', req.body.filename)
+    //console.log('filename', req.body.filename)
     if(!req.body.image.filename) {
       console.error("No file in upload");
       res.statusCode = 400;

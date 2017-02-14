@@ -5,8 +5,8 @@
 module.exports = multipart;
 
 /* constants */
-const CRLF = Buffer.from([0x0D,0x0A]);
-const DOUBLE_CRLF = Buffer.from([0x0D,0x0A,0x0D,0x0A]);
+const CRLF = Buffer([0x0D,0x0A]);
+const DOUBLE_CRLF = Buffer([0x0D,0x0A,0x0D,0x0A]);
 
 /**
  * @function multipart
@@ -28,8 +28,9 @@ function multipart(req, res, next) {
   // and responding with a 500 server error
   req.on('error', function(err){
     console.log(err);
-    statusCode = 500;
-    statusMessage = "Server error";
+    res.statusCode = 500;
+    res.statusMessage = "Server error";
+    res.end("Server Err");
   });
 
   // Handle data events by appending the new
