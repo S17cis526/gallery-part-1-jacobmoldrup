@@ -4,9 +4,15 @@
  */
 module.exports = multipart;
 
-/* constants */
+/* constants in */
 const CRLF = Buffer([0x0D,0x0A]);
 const DOUBLE_CRLF = Buffer([0x0D,0x0A,0x0D,0x0A]);
+
+// use these two lines if using a updated version of node. IF its not an update vesrion
+// use the above two lines of code.
+// const CRLF = Buffer.from([0x0D,0x0A]);
+// const DOUBLE_CRLF = Buffer.from([0x0D,0x0A,0x0D,0x0A]);
+
 
 /**
  * @function multipart
@@ -30,7 +36,7 @@ function multipart(req, res, next) {
     console.log(err);
     res.statusCode = 500;
     res.statusMessage = "Server error";
-    res.end("Server Err");
+    res.end("Server err");
   });
 
   // Handle data events by appending the new
@@ -142,7 +148,7 @@ function parseContent(buffer, callback) {
   // multipart content
   var index = buffer.indexOf(DOUBLE_CRLF);
   var head = buffer.slice(0, index).toString();
-  var body = buffer.slice(index + 4, buffer.length - index - 4); // if we dont subtract out the head it allows for a buffer overflow.
+  var body = buffer.slice(index + 4, buffer.length - 4);
 
   // We need to parse the headers from the head section
   // these will be stored as an associative array
@@ -157,13 +163,13 @@ function parseContent(buffer, callback) {
   // We expect all headers to have a Content-Disposition
   // header with a name attribute. If not, we have a
   // malformed header and can stop processing
-  var name = /name="([\w\s\-_]+)"/.exec(headers['content-disposition']);
+  var name = /name="([^;"]+)"/.exec(headers['content-disposition']);
   if(!name) return callback("No name in multipart content header");
 
   // If our content is a file, we expect to see a filename
   // in the content-disposition header; if there isn't a filename,
   // then our body is a field value rather than a binary blob
-  var filename = /filename="([^\\/:\*\?"<>\|]+)"/.exec(headers['content-disposition']);
+  var filename = /filename="([^;"]+)"/.exec(headers['content-disposition']);
   if(filename) {
     // If our content is a file, there may be a Content-Type header
     var contentType = headers['content-type'];
@@ -173,6 +179,6 @@ function parseContent(buffer, callback) {
     callback(false, [name[1], {filename: filename[1], contentType: contentType, data: body}]);
   } else {
     // send the key/value pair using the callback
-    callback(false, [name[1], buffer.toString()]);
+    callback(false, [name[1], body.toString()]);
   }
 }
