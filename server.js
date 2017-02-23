@@ -8,6 +8,7 @@
 /* global variables */
 var multipart = require('./multipart');
 var template = require('./template');
+var staticFiles = require('./static')
 var http = require('http');
 var url = require('url');
 var fs = require('fs');
@@ -20,6 +21,9 @@ var script = fs.readFileSync('public/gallery.js')
 
 // load templates
 template.loadDir('templates');
+
+
+staticFiles.loadDir('public');
 
 /** @function getImageNames
  * Retrieves the filenames for all images in the
@@ -159,16 +163,11 @@ function handleRequest(req, res) {
         uploadImage(req, res);
       }
       break;
-    case '/gallery.css':
-      res.setHeader('Content-Type', 'text/css');
-      res.end(stylesheet);
-      break;
-      case '/gallery.js':
-        res.setHeader('Content-Type', 'text/javascript');
-        res.end(script);
-      break;
     default:
-      serveImage(req.url, req, res);
+      if(staticFiles.isCached('public/' + req.url)){
+          staticFiles.serveFile('public/' + req.url, req, res);
+      }
+      else serveImage(req.url, req, res);
   }
 }
 
